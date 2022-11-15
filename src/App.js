@@ -5,38 +5,63 @@ import Dialog from 'react-bootstrap-dialog'
 
 
 import "./App.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 function App() {
   const [markers, setMarkers] = useState([]);
   const [image, setImage] = useState(null);
+  const dialoagRef = useRef()
   const CustomMarker = (props) => {
     return (
       <>
         <p
           className="custom-marker"
-          style={{ color: "black", backgroundColor: "red" }}
+          style={{ color: "#CB052C" }}
         >
-          My custom marker - {props.itemNumber}
+          {props.label}
         </p>
       </>
     );
   };
 
+  const addMarkerPoint = (marker) =>{
+    setMarkers([...markers,marker])
+  }
+
+  const hidePrompt = () =>{
+    dialoagRef.current.hide()
+  }
   const addMarker = (marker) => {
-    
-    Dialog.TextPrompt({initialValue: 'me@example.com', placeholder: 'your email'})
-    setMarkers([...markers, marker])
+    dialoagRef.current.show({
+      title: "Label",
+      prompt: {
+        initialValue: 'me@example.com', 
+        placeholder: 'your email',
+        required:true
+      },
+      actions: [
+        Dialog.Action('Cancel', () => hidePrompt()),
+        Dialog.Action('Add', (a,b) => {
+
+          addMarkerPoint({
+            ...marker,
+            label:a.promptInput.state.value
+        })
+        })
+      ]
+    })
+
   };
 
   return (
     <div className="App">
       <header className="App-header">
+        <Dialog ref={dialoagRef}></Dialog>
         <ImageMarker
           src={car}
           markers={markers}
           onAddMarker={(marker) => addMarker(marker)}
-          // markerComponent={CustomMarker}
+          markerComponent={CustomMarker}
         />
       </header>
     </div>
